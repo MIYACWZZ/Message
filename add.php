@@ -12,9 +12,26 @@ if(file_exists($filename)){
     $msgs=unserialize($string);
   }
 }
-
+//检测用户是否点击了提交按钮
+//isset 检测变量是否已经设置并且非null
+//strip_tags — 从字符串中去除 HTML 和 PHP 标记
+if(isset($_POST['pubMsg'])){
+  $username=$_POST['username'];
+  $title=strip_tags($_POST['title']);
+  $content=strip_tags($_POST['content']);
+  $time=time();
+  //快速组成关联数组
+  $data=compact('username','title','content','time');
+  array_push($msgs,$data);
+  //将数组序列化成字符串
+  $msgs=serialize($msgs);
+  if(file_put_contents($filename,$msgs)){
+    echo "<script>alert('留言成功！');location.href='message.php'</script>";
+  }else {
+    echo "<script>alert('留言失败！');location.href='message.php'</script>";
+  }
+}
  ?>
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -29,15 +46,6 @@ if(file_exists($filename)){
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-    <script type="text/javascript">
-      function del(key){
-        if(confirm("确定删除吗?")){
-          location.href="del.php?del="+key;
-        }else {
-          location.href="message.php";
-        }
-      }
-    </script>
   </head>
   <body>
 
@@ -46,7 +54,7 @@ if(file_exists($filename)){
 		<div class="col-md-12">
 			<div class="page-header">
 				<h1>
-					IMOOC留言板 <small>-v2.0</small>
+					IMOOC留言板 <small>-v1.0</small>
 				</h1>
 			</div>
 			<div class="jumbotron">
@@ -60,70 +68,30 @@ if(file_exists($filename)){
 					<a class="btn btn-primary btn-large" href="#">Learn more</a>
 				</p>
 			</div>
-      <?php if (is_array($msgs)&&count($msgs)>0):?>
-			<table class="table">
-				<thead>
-					<tr>
-						<th>
-							编号
-						</th>
-						<th>
-							用户
-						</th>
-						<th>
-						  标题
-						</th>
-						<th>
-							时间
-						</th>
-            <th>
-							内容
-						</th>
-            <th>
-							编辑
-						</th>
-            <th>
-							删除
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-          <?php $i=1;foreach($msgs as $key=>$val):?>
-					<tr class="table-active">
-						<td>
-							<?php echo $i++; ?>
-						</td>
-						<td>
-							<?php echo $val['username'] ?>
-						</td>
-            <td>
-              <?php echo $val['title'] ?>
-						</td>
-						<td>
-							<?php echo date('Y/m/d H:i:s',$val['time']) ?>
-						</td>
-						<td>
-							<?php echo $val['content'] ?>
-						</td>
-            <td>
-              <a href="edit.php?key=<?php echo $key ?>">编辑</a>
-						</td>
-            <td>
-              <a href="#" onclick="del(<?php echo $key ?>)">删除</a>
-            </td>
-					</tr>
-        <?php endforeach; ?>
-				</tbody>
-			</table>
-    <?php endif; ?>
+      <br/>
       <br/>
       <div class="col-md-12">
-			 <form action="add.php" method="post">
-         <input type="submit" name="" value="添加留言" class="btn btn-info btn-lg btn-block active">
-       </form>
-    <br/>
-    <br/>
-		</div>
+			<form action='#' method="post">
+        <h3>
+				请留言
+        </h3><hr/>
+        <div class="form-group">
+          <label for="exampleInputUsername">
+						用户名
+					</label>
+          <input type="text" required name="username" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="exampleInputTitle">标题</label>
+          <input type="text" name="title" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="exampleInputContent">内容</label>
+          <textarea name="content" rows="5" cols="30" class="form-control" required></textarea>
+        </div>
+          <input type="submit" class="btn btn-primary btn-lg" value="发布留言" name="pubMsg">
+			</form>
+    </div>
 		</div>
 	</div>
 </div>
